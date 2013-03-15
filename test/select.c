@@ -9,7 +9,11 @@
  */
 
 int main(void) {
+#ifdef WIN32
+        URL_T url = URL_new("sqlite://c:/test.db");
+#else
         URL_T url = URL_new("sqlite:///tmp/test.db");
+#endif
         ConnectionPool_T pool = ConnectionPool_new(url);
         ConnectionPool_start(pool);
         Connection_T con = ConnectionPool_getConnection(pool);

@@ -64,6 +64,15 @@
  for name symbol interposing
 
 
+ MinGW
+ -----
+
+ export LIBRARY_PATH=/lib
+ CFLAGS="-DWIN32 -Wall" LDFLAGS="-lws2_32" ./configure --prefix=/mingw
+ make
+ make install 
+
+
  API Documentation
  -----------------
  

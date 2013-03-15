@@ -3,8 +3,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <unistd.h>
 #include <stdlib.h>
+
+#if defined(WIN32)
+#include <windows.h>
+#define sleep(n) Sleep(1000 * (n))
+#else
+#include <unistd.h>
+#endif
+
 
 #include "URL.h"
 #include "Thread.h"

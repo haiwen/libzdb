@@ -96,6 +96,154 @@ static const uchar_t urlunsafe[256] = {
 /* ------------------------------------------------------- Private methods */
 
 
+#ifdef WIN32
+static int parseURL(T U) {
+        param_t param = NULL;
+	/*!re2c
+	ws2		= [ \t\r\n];
+	any2		= [\000-\377];
+	protocol2        = [a-zA-Z0-9]+"://";
+	auth2            = ([\040-\377]\[@])+[@];
+	host2            = ([a-zA-Z0-9\-]+)([.]([a-zA-Z0-9\-]+))*;
+	port2            = [:][0-9]+;
+	path2            = [a-zA-Z][:][/]([\041-\377]\[?#;])*;
+	query2           = ([\040-\377]\[#])*;
+	parameterkey2    = ([\041-\377]\[=])+;
+	parametervalue2  = ([\040-\377]\[&])*;
+	*/
+proto:
+	if (YYCURSOR >= YYLIMIT)
+		return false;
+	YYTOKEN = YYCURSOR;
+	/*!re2c
+
+        ws2         {
+                        goto proto;
+		   }
+
+        "mysql://" {
+                      	SET_PROTOCOL(MYSQL_DEFAULT_PORT);
+                   }
+                   
+        "postgresql://" {
+                      	SET_PROTOCOL(POSTGRESQL_DEFAULT_PORT);
+                   }
+
+        "oracle://" {
+                      	SET_PROTOCOL(ORACLE_DEFAULT_PORT);
+                   }
+
+        protocol2  {
+                      	SET_PROTOCOL(UNKNOWN_PORT);
+                   }
+    
+        any2       {
+                      	goto proto;
+                   }
+	*/
+authority:
+	if (YYCURSOR >= YYLIMIT)
+		return true;
+	YYTOKEN = YYCURSOR;
+	/*!re2c
+    
+        ws2        { 
+                        goto authority; 
+                   }
+
+        auth2      {
+                        *(YYCURSOR - 1) = 0;
+                        U->user = YYTOKEN;
+                        char *p = strchr(U->user, ':');
+                        if (p) {
+                                *(p++) = 0;
+                                U->password = URL_unescape(p);
+                        }
+                        URL_unescape(U->user);
+                        goto authority; 
+                   }
+
+        host2      {
+                        U->host = Str_ndup(YYTOKEN, (int)(YYCURSOR - YYTOKEN));
+                        goto authority; 
+                   }
+
+        port2      {
+                        U->port = Str_parseInt(YYTOKEN + 1); // read past ':'
+                        goto authority; 
+                   }
+
+        path2      {
+                        *YYCURSOR = 0;
+                        U->path = URL_unescape(YYTOKEN);
+                        return true;
+                   }
+                   
+        path2[?]   {
+                        *(YYCURSOR-1) = 0;
+                        U->path = URL_unescape(YYTOKEN);
+                        goto query; 
+                   }
+                   
+       any2        {
+                      	return true;
+                   }
+                   
+	*/
+query:
+        if (YYCURSOR >= YYLIMIT)
+		return true;
+	YYTOKEN =  YYCURSOR;
+	/*!re2c
+
+        query2     {
+                        *YYCURSOR = 0;
+                        U->query = Str_ndup(YYTOKEN, (int)(YYCURSOR - YYTOKEN));
+                        YYCURSOR = YYTOKEN; // backtrack to start of query string after terminating it and
+                        goto params;
+                   }
+
+        any2       { 
+                      return true;     
+                   }
+		   
+	*/
+params:
+	if (YYCURSOR >= YYLIMIT)
+		return true;
+	YYTOKEN =  YYCURSOR;
+	/*!re2c
+         
+         parameterkey2 {
+                /* No parameters in querystring */
+                return true;
+        }
+
+        parameterkey2/[=] {
+                NEW(param);
+                param->name = YYTOKEN;
+                param->next = U->params;
+                U->params = param;
+                goto params;
+        }
+
+        [=]parametervalue2[&]? {
+                *YYTOKEN++ = 0;
+                if (*(YYCURSOR - 1) == '&')
+                        *(YYCURSOR - 1) = 0;
+                if (! param) /* format error */
+                        return true; 
+                param->value = URL_unescape(YYTOKEN);
+                goto params;
+        }
+
+        any2 { 
+                return true;
+        }
+        */
+        return false;
+}
+#else
 static int parseURL(T U) {
         param_t param = NULL;
 	/*!re2c
@@ -242,7 +390,7 @@ params:
         */
         return false;
 }
-
+#endif
 
 static inline int x2b(uchar_t *x) {
 	register int b;
