@@ -95,7 +95,9 @@ static const uchar_t urlunsafe[256] = {
 
 /* ------------------------------------------------------- Private methods */
 
-
+/*
+ * In Windows, path may begin with "C:", not "/"
+ */
 #ifdef WIN32
 static int parseURL(T U) {
         param_t param = NULL;
