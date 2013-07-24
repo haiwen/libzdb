@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 #include <sys/time.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 typedef long suseconds_t;
 #else

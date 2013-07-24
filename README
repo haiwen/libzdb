@@ -67,8 +67,10 @@
  MinGW
  -----
 
- export LIBRARY_PATH=/lib
- CFLAGS="-DWIN32 -Wall" LDFLAGS="-lws2_32" ./configure --prefix=/mingw
+ export LIBRARY_PATH=/lib:"/c/Program Files/MySQL/MySQL Server 5.6/lib"
+ export C_INCLUDE_PATH="/c/Program Files/MySQL/MySQL Server 5.6/include"
+ autogen.sh
+ ./configure --prefix=/mingw
  make
  make install 
 

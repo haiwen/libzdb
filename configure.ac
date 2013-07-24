@@ -6,9 +6,17 @@ AC_INIT([libzdb], [2.11.1], [bugs-libzdb@tildeslash.com])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
+AC_MINGW32
 AC_CONFIG_SRCDIR([src/Config.h])
 AC_CONFIG_COMMANDS([libtool_patch],[test `uname` = "OpenBSD" && perl -p -i -e "s/deplibs_check_method=.*/deplibs_check_method=pass_all/g" libtool])
 
+AC_MSG_CHECKING(for WIN32)
+if test "$MINGW32" = yes; then
+  bwin32=true
+  AC_MSG_RESULT(compile in mingw32)
+else
+  AC_MSG_RESULT(no)
+fi
 
 # ---------------------------------------------------------------------------
 # Programs 
@@ -188,6 +196,7 @@ AC_SEARCH_LIBS([dlopen], [dl])
 # Database Libraries 
 
 mysql="yes"
+if test "$bwin32" != true ; then
 check_mysql_config() 
 {
         AC_PATH_PROG([MYSQLCONFIG], [mysql_config], [no], [$PATH:/usr/local/bin:/usr/local/mysql/bin])
@@ -230,6 +239,11 @@ if test "xyes" = "x$mysql"; then
                 CPPFLAGS=$svd_CPPFLAGS
                 LDFLAGS=$svd_LDFLAGS
         fi
+fi
+else
+        AC_DEFINE([HAVE_LIBMYSQLCLIENT], 1, [Define to 1 to enable mysql])
+        LDFLAGS="$LDFLAGS -lmysql -lws2_32"
+        DBLDFLAGS="$DBLDFLAGS -lmysql -lws2_32"
 fi
 AM_CONDITIONAL([WITH_MYSQL], test "xyes" = "x$mysql")
 

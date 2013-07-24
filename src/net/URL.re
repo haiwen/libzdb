@@ -98,8 +98,8 @@ static const uchar_t urlunsafe[256] = {
 /*
  * In Windows, path may begin with "C:", not "/"
  */
-#ifdef WIN32
-static int parseURL(T U) {
+#ifdef _WIN32
+static int parseURLWinSqlite(T U) {
         param_t param = NULL;
 	/*!re2c
 	ws2		= [ \t\r\n];
@@ -245,7 +245,7 @@ params:
         */
         return false;
 }
-#else
+#endif
 static int parseURL(T U) {
         param_t param = NULL;
 	/*!re2c
@@ -392,7 +392,7 @@ params:
         */
         return false;
 }
-#endif
+
 
 static inline int x2b(uchar_t *x) {
 	register int b;
@@ -427,6 +427,14 @@ static T ctor(uchar_t *data) {
 	YYCURSOR = U->data;
 	U->port = UNKNOWN_PORT;
 	YYLIMIT = U->data + strlen(U->data);
+
+#ifdef _WIN32
+    if (memcmp(data, "sqlite://", 9) == 0) {
+     	if (! parseURLWinSqlite(U))
+            URL_free(&U);
+        return 0;
+    }
+#endif
 	if (! parseURL(U))
                 URL_free(&U);
 	return U;

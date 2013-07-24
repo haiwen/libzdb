@@ -9,8 +9,9 @@
  */
 
 int main(void) {
-#ifdef WIN32
+#ifdef _WIN32
         URL_T url = URL_new("sqlite://c:/test.db");
+        //URL_T url = URL_new("mysql://localhost:3306/test?user=root&password=111111");
 #else
         URL_T url = URL_new("sqlite:///tmp/test.db");
 #endif

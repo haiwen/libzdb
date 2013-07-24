@@ -18,6 +18,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#include <winsock.h>
+#endif
 #include <mysql.h>
 #include <errmsg.h>
 

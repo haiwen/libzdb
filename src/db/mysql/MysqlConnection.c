@@ -18,6 +18,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#include <winsock.h>
+#endif
 #include <mysql.h>
 #include <errmsg.h>
 
@@ -82,7 +85,7 @@ extern const struct Pop_T mysqlpops;
 
 
 static MYSQL *doConnect(URL_T url, char **error) {
-#define ERROR(e) do {*error = Str_dup(e); goto error;} while (0)
+#define MYSQL_ERROR(e) do {*error = Str_dup(e); goto error;} while (0)
         int port;
         my_bool yes = 1;
         my_bool no = 0;
@@ -97,18 +100,18 @@ static MYSQL *doConnect(URL_T url, char **error) {
         } 
         if (! (user = URL_getUser(url)))
                 if (! (user = URL_getParameter(url, "user")))
-                        ERROR("no username specified in URL");
+                        MYSQL_ERROR("no username specified in URL");
         if (! (password = URL_getPassword(url)))
                 if (! (password = URL_getParameter(url, "password")))
-                        ERROR("no password specified in URL");
+                        MYSQL_ERROR("no password specified in URL");
         if (unix_socket) {
 		host = "localhost"; // Make sure host is localhost if unix socket is to be used
         } else if (! (host = URL_getHost(url)))
-                ERROR("no host specified in URL");
+                MYSQL_ERROR("no host specified in URL");
         if ((port = URL_getPort(url)) <= 0)
-                ERROR("no port specified in URL");
+                MYSQL_ERROR("no port specified in URL");
         if (! (database = URL_getPath(url)))
-                ERROR("no database specified in URL");
+                MYSQL_ERROR("no database specified in URL");
         else
                 database++;
         /* Options */
@@ -121,7 +124,7 @@ static MYSQL *doConnect(URL_T url, char **error) {
         else
                 mysql_options(db, MYSQL_SECURE_AUTH, (const char*)&no);
         if ((timeout = URL_getParameter(url, "connect-timeout"))) {
-                TRY connectTimeout = Str_parseInt(timeout); ELSE ERROR("invalid connect timeout value"); END_TRY;
+                TRY connectTimeout = Str_parseInt(timeout); ELSE MYSQL_ERROR("invalid connect timeout value"); END_TRY;
         }
         mysql_options(db, MYSQL_OPT_CONNECT_TIMEOUT, (const char*)&connectTimeout);
         if ((charset = URL_getParameter(url, "charset")))
