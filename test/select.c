@@ -15,6 +15,7 @@ int main(void) {
 #else
         URL_T url = URL_new("sqlite:///tmp/test.db");
 #endif
+        assert(url);
         ConnectionPool_T pool = ConnectionPool_new(url);
         ConnectionPool_start(pool);
         Connection_T con = ConnectionPool_getConnection(pool);

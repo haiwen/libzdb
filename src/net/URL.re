@@ -432,7 +432,7 @@ static T ctor(uchar_t *data) {
     if (memcmp(data, "sqlite://", 9) == 0) {
      	if (! parseURLWinSqlite(U))
             URL_free(&U);
-        return 0;
+        return U;
     }
 #endif
 	if (! parseURL(U))
