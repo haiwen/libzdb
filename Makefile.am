@@ -81,6 +81,7 @@ clean-local:
 distclean-local: 
 	-rm -rf autom4te.cache/ \
                 build/ \
+                zdb/ \
                 $(LIBRARY_NAME)
 	-rm -f  doc/api-docs/*h.html \
                 doc/api-docs/doxygen.css \
@@ -88,6 +89,7 @@ distclean-local:
                 doc/api-docs/*.gif \
                 tools/bin/filterh \
                 src/xconfig.h.in \
+                src/net/URL.c \
                 config/config.guess \
                 config/config.sub
                         
