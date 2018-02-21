@@ -5,6 +5,7 @@ config.sub
 autom4te.cache
 Makefile.in
 .dirstamp
+.libs/
 Makefile
 src/net/URL.c
 aclocal.m4
@@ -18,6 +19,12 @@ src/stamp-h1
 src/xconfig.h
 src/xconfig.h.in
 tools/bin/
+libzdb.la
+test/.libs/
+test/exception
+test/pool
+test/select
+test/unit
 zdb.pc
 zdb/
 
